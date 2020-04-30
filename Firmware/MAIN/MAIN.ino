@@ -94,7 +94,46 @@ void setup() {
 //////////////////// LOOP
 void loop() {
 
-  matrix_blobs_get();
+  if (calibrate) matrix_calibrate(&minValsArray[0]);
+  matrix_scan(&frameArray[0]);
+  matrix_interp(&interpolatedFrame, &inputFrame, &interp);
+  find_blobs(
+    threshold,          // uint8_t
+    &interpolatedFrame, // image_t (uint8_t array[NEW_FRAME] - 64*64 1D array)
+    &bitmap,            // image_t (uint8_t array[NEW_FRAME] - 64*64 1D array)
+    &lifo_stack,        // lifo_t
+    &lifo,              // lifo_t
+    &blobs_stack,       // list_t
+    &blobs,             // list_t
+    &outputBlobs        // list_t
+  );
+
+  // Send all blobs in MIDI format
+  // usbMIDI.sendControlChange(control, value, channel);
+  int pos = 0;
+  for (blob_t* blob = ITERATOR_START_FROM_HEAD(&outputBlobs); blob != NULL; blob = ITERATOR_NEXT(blob)) {
+
+    pos = blob->UID * 10;
+
+    if (blob->alive == 1) {
+      //usbMIDI.sendControlChange(1 + pos, blob->UID,      1); //
+      usbMIDI.sendAfterTouchPoly(0 + pos, blob->alive,      1); //
+      usbMIDI.sendAfterTouchPoly(1 + pos, blob->centroid.X, 1); //
+      usbMIDI.sendAfterTouchPoly(2 + pos, blob->centroid.Y, 1); //
+      usbMIDI.sendAfterTouchPoly(3 + pos, blob->box.W,      1); //
+      usbMIDI.sendAfterTouchPoly(4 + pos, blob->box.H,      1); //
+      usbMIDI.sendAfterTouchPoly(5 + pos, blob->box.D >> 1, 1); //
+    }
+    else {
+      //usbMIDI.sendControlChange(1 + pos, 0, 1); //
+      usbMIDI.sendAfterTouchPoly(0 + pos, 0, 1);   //
+      usbMIDI.sendAfterTouchPoly(1 + pos, 0, 1);   //
+      usbMIDI.sendAfterTouchPoly(2 + pos, 0, 1);   //
+      usbMIDI.sendAfterTouchPoly(3 + pos, 0, 1);   //
+      usbMIDI.sendAfterTouchPoly(4 + pos, 0, 1);   //
+      usbMIDI.sendAfterTouchPoly(5 + pos, 0, 1);   //
+    }
+  }
 
   while (usbMIDI.read()); // Read and discard any incoming MIDI messages
 
@@ -296,48 +335,4 @@ void matrix_calibrate(uint8_t* outputFrame) {
 // Set the threshold
 void matrix_threshold_set() {
   //threshold = msg.getInt(0) & 0xFF; // Get the first uint8_t of the int32_t
-}
-
-void matrix_blobs_get() {
-
-  if (calibrate) matrix_calibrate(&minValsArray[0]);
-  matrix_scan(&frameArray[0]);
-  matrix_interp(&interpolatedFrame, &inputFrame, &interp);
-  find_blobs(
-    threshold,          // uint8_t
-    &interpolatedFrame, // image_t (uint8_t array[NEW_FRAME] - 64*64 1D array)
-    &bitmap,            // image_t (uint8_t array[NEW_FRAME] - 64*64 1D array)
-    &lifo_stack,        // lifo_t
-    &lifo,              // lifo_t
-    &blobs_stack,       // list_t
-    &blobs,             // list_t
-    &outputBlobs        // list_t
-  );
-
-  // Send all blobs in MIDI format
-  // usbMIDI.sendControlChange(control, value, channel);
-  int pos = 0;
-  for (blob_t* blob = ITERATOR_START_FROM_HEAD(&outputBlobs); blob != NULL; blob = ITERATOR_NEXT(blob)) {
-
-    pos = blob->UID * 10;
-    
-    if (blob->alive == 1) {
-      //usbMIDI.sendControlChange(1 + pos, blob->UID,      1); //
-      usbMIDI.sendControlChange(0 + pos, blob->alive,      1); //
-      usbMIDI.sendControlChange(1 + pos, blob->centroid.X, 1); //
-      usbMIDI.sendControlChange(2 + pos, blob->centroid.Y, 1); //
-      usbMIDI.sendControlChange(3 + pos, blob->box.W,      1); //
-      usbMIDI.sendControlChange(4 + pos, blob->box.H,      1); //
-      usbMIDI.sendControlChange(5 + pos, blob->box.D >> 1, 1); //
-    }
-    else {
-      //usbMIDI.sendControlChange(1 + pos, 0, 1); //
-      usbMIDI.sendControlChange(0 + pos, 0, 1);   //
-      usbMIDI.sendControlChange(1 + pos, 0, 1);   //
-      usbMIDI.sendControlChange(2 + pos, 0, 1);   //
-      usbMIDI.sendControlChange(3 + pos, 0, 1);   //
-      usbMIDI.sendControlChange(4 + pos, 0, 1);   //
-      usbMIDI.sendControlChange(5 + pos, 0, 1);   //
-    }
-  }
 }

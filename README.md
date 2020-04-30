@@ -36,7 +36,7 @@ From the beginning, this project stimulates the development of technologies in a
 ## Copyright
 Except as otherwise noted, all files in the resistiveMatrix project folder
 
-    Copyright (c) 2014-2018 Maurin Donneaud and others.
+    Copyright (c) 2014-2020 Maurin Donneaud and others.
 
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see LICENSE.txt included in the resistiveMatrix project folder.

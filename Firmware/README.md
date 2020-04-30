@@ -10,13 +10,13 @@
 - Arduino IDE additional library
   - SPI: https://www.pjrc.com/teensy/td_libs_SPI.html (Hardware)
   - ADC: https://github.com/pedvide/ADC (include in Teensyduino)
-  - OSC: https://github.com/CNMAT/OSC (Installed with Arduino library manager)
+  - MIDI:
 
 ### Settings for Arduino IDE
 - Board:       Teensy 3.1-3.2
-- USB Type:    Serial
+- USB Type:    MIDI
 - CPU speed    120 Mhz (overclock)
-- Optimize     Fastest
+- Optimize     Fastest 
 
 ### Settings for Arduino-mk
     sudo apt-get install arduino-mk
@@ -27,29 +27,29 @@
 - The Arduio sketch implemant rows and columns scaning algorithm with synchronous **dual ADC sampling**.
   - COLS = Two 8_Bits shift registers connected directly to the matrix columns.
   - ROWS = One 8_Bits shift register connected to two analog multiplexers that sens the matrix rows.
-- The 16x16 Analog sensors values are interpolated into 64x64 with a bilinear algorithm.
+- The 16x16 Analog sensors values are interpolated into 127x127 with a bilinear algorithm.
 - The blob tracking algorithm (connected component labeling) is applyed onto the interpolated matrix.
 - Each blob are tracked with persistent ID (this is done with linked list implementation).
-- The blobs coordinates, size and presure are transmit via SLIP-OSC communication protocol.
+- The blobs coordinates, size and presure are transmit via MIDI communication protocol.
 
-## SLIP-OSC data paket
+## MIDI data paket
 ### on_touch_pressed
-    [0:255]	: UID (percistant blob ID)
+    [0:127]	: UID (percistant blob ID)
 	[1] 	: alive
-    [0:64]  : centroid.X (X blob coordinate)
-    [0:64]  : centroid.Y (Y blob coordinate)
-    [0:255] : box.W (blob bounding box Width)
-    [0:255] : box.H (blob bounding box Height)
-    [0:255] : box.D (blob bounding box depth - the maximum pressur value in all the blob pixels)
+    [0:127] : centroid.X (X blob coordinate)
+    [0:127] : centroid.Y (Y blob coordinate)
+    [0:127] : box.W (blob bounding box Width)
+    [0:127] : box.H (blob bounding box Height)
+    [0:127] : box.D (blob bounding box depth - the maximum pressur value in all the blob pixels)
 
 ### on_touch_release // FIXME or not ?
-    [0:255]	: UID (percistant blob ID)
-	[0] 	: alive
-    [0:64] : centroid.X
-    [0:64] : centroid.Y
-    [0:255] : box.W
-    [0:255] : box.H
-    [0:255] : box.D
+    [0:127]	: UID (percistant blob ID)
+	[0]	: alive
+    [0] : centroid.X
+    [0] : centroid.Y
+    [0] : box.W
+    [0] : box.H
+    [0] : box.D
 
 ## E256 & Teensy pins
 Control pins to send values to the 8-BITs shift registers used on the E-256 PCB
