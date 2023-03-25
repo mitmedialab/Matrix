@@ -66,8 +66,8 @@ void ofApp::setup(void) {
   gui.setup("E256 - Parameters");
   gui.add(setCalirationButton.setup("Calibrate"));
   gui.add(setTresholdSlider.setup("Threshold", 20, 0, 100));
-  gui.add(getRawDataToggle.setup("getRawData", false));
-  gui.add(getInterpDataToggle.setup("getInterpData", true));
+  gui.add(getRawDataToggle.setup("getRawData", true));
+  gui.add(getInterpDataToggle.setup("getInterpData", false));
   gui.add(getBinDataToggle.setup("getBinData", false));
   gui.add(getBlobsToggle.setup("getBlobs", false));
 
@@ -109,6 +109,13 @@ void ofApp::setup(void) {
     }
   }
   //setMaximumBufferSize
+
+  // list available MIDI ports and connect
+  midiOut.listOutPorts();
+  midiOut.openPort(1); // by number
+  /*midiOut.openPort("IAC Driver Pure Data In"); // by name
+  midiOut.openVirtualPort("ofxMidiOut"); // open a virtual port
+  */
 }
 
 /////////////////////// SERIAL EVENT ///////////////////////
@@ -122,7 +129,11 @@ void ofApp::onSerialBuffer(const ofxIO::SerialBufferEventArgs& args) {
     //ofLogNotice("ofApp::onSerialBuffer") << "E256 - Serial message : " << message.OSCmessage;
     for (int i=0; i<RAW_FRAME; i++) {
       rawValues[i] = inputFrameBuffer[i + offset];
-      //ofLogNotice("ofApp::onSerialBuffer") << "INDEX_" << i << " val_" << rawValues[i];
+      // Send data over MIDI:
+      if (rawValues[i] > ofApp::threshold) { // max = 254
+        int velocity = int(rawValues[i]) / 2; // MIDI max = 127
+        midiOut.sendControlChange(0, i, velocity); // (int channel, int control, int value);
+      }
     }
     // Update vertices with the E256 raw sensor values
     for (int index=0; index<RAW_FRAME; index++) {
@@ -352,7 +363,8 @@ void ofApp::E256_setTreshold(int & tresholdValue) {
   packet << OSCmsg.getArgAsInt32(0);
   packet << osc::EndMessage;
   serialDevice.send(ByteBuffer(packet.Data(), packet.Size()));
-  ofLogNotice("ofApp::E256_setTreshold") << "E256 - Threshold seted : " << OSCmsg.getArgAsInt32(0);
+  //ofLogNotice("ofApp::E256_setTreshold") << "E256 - Threshold seted : " << OSCmsg.getArgAsInt32(0);
+  ofApp::threshold = tresholdValue;
 }
 
 // E256 matrix sensor - MATRIX RAW DATA REQUEST START

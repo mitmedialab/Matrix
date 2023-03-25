@@ -5,6 +5,7 @@
 #include "ofxOsc.h"
 #include "ofxGui.h"
 #include "ofxOsc.h"
+#include "ofxMidi.h"
 
 #define USB_PORT              "/dev/ttyACM0"
 #define BAUD_RATE             230400  // With Teensy, it's always the same native speed. The baud rate setting is ignored.
@@ -70,6 +71,9 @@ public:
     ofxToggle                     getRawDataToggle;
     ofxToggle                     getInterpDataToggle;
     ofxToggle                     getBinDataToggle;
+
+    int                           threshold;
+    ofxMidiOut                    midiOut;
 
     uint8_t                       inputFrameBuffer[IN_BUFFER_SIZE];
     uint8_t                       rawValues[RAW_FRAME];    // 1D array (16*16)
