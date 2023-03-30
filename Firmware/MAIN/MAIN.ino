@@ -96,7 +96,9 @@ void loop() {
 
   if (calibrate) matrix_calibrate(&minValsArray[0]);
   matrix_scan(&frameArray[0]);
+  usbMIDI_sendNotes(frameArray);
   matrix_interp(&interpolatedFrame, &inputFrame, &interp);
+/*
   find_blobs(
     threshold,          // uint8_t
     &interpolatedFrame, // image_t (uint8_t array[NEW_FRAME] - 64*64 1D array)
@@ -134,7 +136,7 @@ void loop() {
       usbMIDI.sendAfterTouchPoly(5 + pos, 0, 1);   //
     }
   }
-
+*/
   while (usbMIDI.read()); // Read and discard any incoming MIDI messages
 
 #ifdef DEBUG_ADC
@@ -336,3 +338,25 @@ void matrix_calibrate(uint8_t* outputFrame) {
 void matrix_threshold_set() {
   //threshold = msg.getInt(0) & 0xFF; // Get the first uint8_t of the int32_t
 }
+
+void usbMIDI_sendNotes(uint8_t* velocity) {
+  static uint8_t prev_velocity[RAW_FRAME] = {0};
+  const uint8_t threshold = 3;
+
+  for (int note = 0; note < RAW_FRAME; note++) {
+    const uint8_t channel = (note < 128) ? 0 : 1;
+
+    if (velocity[note] < threshold) {
+        velocity[note] = 0;
+
+        // don't send off everytime:
+        if (prev_velocity[note] != 0)
+          usbMIDI.sendNoteOff(note, prev_velocity[note], channel);
+    } else {
+      usbMIDI.sendNoteOn(note, velocity[note], channel);
+    }
+
+    prev_velocity[note] = velocity[note];
+  }
+}
+
