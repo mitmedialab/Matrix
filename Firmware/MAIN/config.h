@@ -47,7 +47,7 @@
 #define BLOB_PACKET_SIZE      7        // Blob data packet (bytes)
 
 #define E256_SS_PIN           10       // SPI:SS    E2B56:RCK  // D10 - Hardware SPI no need to specify it
-#define E256_SCK_PIN          13       // SPI:SCK   E2B56:SCK  // D13 - Hardware SPI no need to specify it
+#define E256_SCK_PIN          14       // SPI:SCK - using alternate pin (instead of D13)
 #define E256_MOSI_PIN         11       // SPI:MOSI  E2B56:DS   // D11 - Hardware SPI no need to specify it
 
 #define ADC0_PIN              A9       // The output of multiplexerA (SIG pin) is connected to Analog pin 9

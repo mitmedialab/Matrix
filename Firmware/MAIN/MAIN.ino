@@ -231,7 +231,7 @@ void loop() {
 void SPI_SETUP(void) {
 
   //SPI.setSCK(E256_SS_PIN);        // D10 - Hardware SPI no need to specify it!
-  //SPI.setSCK(E256_SCK_PIN);       // D13 - Hardware SPI no need to specify it!
+  SPI.setSCK(E256_SCK_PIN);         // D14 - using alternate pin (instead of D13)
   //SPI.setMOSI(E256_MOSI_PIN);     // D11 - Hardware SPI no need to specify it!
   pinMode(E256_SS_PIN, OUTPUT);
   pinMode(E256_SCK_PIN, OUTPUT);
